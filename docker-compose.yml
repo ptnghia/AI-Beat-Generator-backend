@@ -1,0 +1,105 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  db:
+    image: mysql:8.0
+    container_name: beat-generator-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_password_change_me}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-beat_generator}
+      MYSQL_USER: ${MYSQL_USER:-beatgen}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-beatgen_password_change_me}
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./backups:/backups
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-root_password_change_me}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - beat-network
+
+  # AI Beat Generator Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: beat-generator-app
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    environment:
+      # Node environment
+      NODE_ENV: production
+      PORT: 3000
+      
+      # Database
+      DATABASE_URL: mysql://${MYSQL_USER:-beatgen}:${MYSQL_PASSWORD:-beatgen_password_change_me}@db:3306/${MYSQL_DATABASE:-beat_generator}
+      
+      # AI API Keys
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      SUNO_API_KEYS: ${SUNO_API_KEYS}
+      
+      # Rate limiting
+      RATE_LIMIT_WINDOW: ${RATE_LIMIT_WINDOW:-60000}
+      RATE_LIMIT_MAX_REQUESTS: ${RATE_LIMIT_MAX_REQUESTS:-100}
+      
+      # Scheduler
+      SCHEDULER_ENABLED: ${SCHEDULER_ENABLED:-true}
+      SCHEDULER_INTERVAL: ${SCHEDULER_INTERVAL:-*/15 * * * *}
+      
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      # Persistent storage for generated beats
+      - beat_output:/app/output/beats
+      - cover_output:/app/output/covers
+      - preview_output:/app/output/previews
+      - app_logs:/app/logs
+      # Mount catalog for easy updates
+      - ./beat_catalog.xml:/app/beat_catalog.xml:ro
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    networks:
+      - beat-network
+
+  # Optional: Adminer for database management
+  adminer:
+    image: adminer:latest
+    container_name: beat-generator-adminer
+    restart: unless-stopped
+    ports:
+      - "${ADMINER_PORT:-8080}:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+    depends_on:
+      - db
+    networks:
+      - beat-network
+
+volumes:
+  mysql_data:
+    driver: local
+  beat_output:
+    driver: local
+  cover_output:
+    driver: local
+  preview_output:
+    driver: local
+  app_logs:
+    driver: local
+
+networks:
+  beat-network:
+    driver: bridge

@@ -1,0 +1,247 @@
+<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+ <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+  <Author>openpyxl</Author>
+  <LastAuthor>Trung Nghĩa Phan</LastAuthor>
+  <Created>2025-12-12T20:09:22Z</Created>
+  <LastSaved>2025-12-13T01:33:04Z</LastSaved>
+  <Version>16.00</Version>
+ </DocumentProperties>
+ <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
+  <AllowPNG/>
+ </OfficeDocumentSettings>
+ <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
+  <WindowHeight>19340</WindowHeight>
+  <WindowWidth>32767</WindowWidth>
+  <WindowTopX>32767</WindowTopX>
+  <WindowTopY>620</WindowTopY>
+  <ProtectStructure>False</ProtectStructure>
+  <ProtectWindows>False</ProtectWindows>
+ </ExcelWorkbook>
+ <Styles>
+  <Style ss:ID="Default" ss:Name="Normal">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="Beat Catalog">
+  <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="21" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultColumnWidth="53" ss:DefaultRowHeight="15">
+   <Column ss:AutoFitWidth="0" ss:Width="99"/>
+   <Column ss:AutoFitWidth="0" ss:Width="101"/>
+   <Column ss:AutoFitWidth="0" ss:Width="109"/>
+   <Column ss:AutoFitWidth="0" ss:Width="94"/>
+   <Column ss:AutoFitWidth="0" ss:Width="96"/>
+   <Row>
+    <Cell><Data ss:Type="String">Category Name</Data></Cell>
+    <Cell><Data ss:Type="String">Genre</Data></Cell>
+    <Cell><Data ss:Type="String">Style</Data></Cell>
+    <Cell><Data ss:Type="String">Mood</Data></Cell>
+    <Cell><Data ss:Type="String">Use-case</Data></Cell>
+    <Cell><Data ss:Type="String">Tags</Data></Cell>
+    <Cell><Data ss:Type="String">Prompt (Sudo AI)</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Lofi Chill Study Beat</Data></Cell>
+    <Cell><Data ss:Type="String">Lo-fi</Data></Cell>
+    <Cell><Data ss:Type="String">Lofi Girl Style</Data></Cell>
+    <Cell><Data ss:Type="String">Chill / Focus</Data></Cell>
+    <Cell><Data ss:Type="String">Study / Productivity</Data></Cell>
+    <Cell><Data ss:Type="String">lofi, chill, study, warm, vinyl, soft drums, mellow</Data></Cell>
+    <Cell><Data ss:Type="String">lofi study beat, 80 BPM, warm vinyl texture, soft drums, gentle electric piano, relaxing bass, loopable 1m, chill ambient mood</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Dark Trap Freestyle Beat</Data></Cell>
+    <Cell><Data ss:Type="String">Trap</Data></Cell>
+    <Cell><Data ss:Type="String">Drake Type</Data></Cell>
+    <Cell><Data ss:Type="String">Dark / Atmospheric</Data></Cell>
+    <Cell><Data ss:Type="String">Freestyle / Rap</Data></Cell>
+    <Cell><Data ss:Type="String">trap, dark, freestyle, drake type, 808, hard drums</Data></Cell>
+    <Cell><Data ss:Type="String">dark trap beat, 140 BPM, heavy 808, sparse piano, atmospheric pads, hard trap drums, freestyle ready</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Emotional Piano Cinematic</Data></Cell>
+    <Cell><Data ss:Type="String">Cinematic</Data></Cell>
+    <Cell><Data ss:Type="String">Drama Score</Data></Cell>
+    <Cell><Data ss:Type="String">Sad / Emotional</Data></Cell>
+    <Cell><Data ss:Type="String">Film / Documentary</Data></Cell>
+    <Cell><Data ss:Type="String">cinematic, piano, emotional, sad, soundtrack, film</Data></Cell>
+    <Cell><Data ss:Type="String">emotional cinematic piano score, slow tempo 75 BPM, deep reverb, soft strings, heartfelt film music</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Afrobeats Summer Vibe</Data></Cell>
+    <Cell><Data ss:Type="String">Afrobeats</Data></Cell>
+    <Cell><Data ss:Type="String">CKay / Rema Style</Data></Cell>
+    <Cell><Data ss:Type="String">Happy / Uplifting</Data></Cell>
+    <Cell><Data ss:Type="String">TikTok / Dance</Data></Cell>
+    <Cell><Data ss:Type="String">afrobeats, summer, amapiano, uplifting, tropical</Data></Cell>
+    <Cell><Data ss:Type="String">afrobeats uplifting groove, 104 BPM, bouncy drums, afro guitar, warm chords, summer vibe, radio ready</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Amapiano Chill Groove</Data></Cell>
+    <Cell><Data ss:Type="String">Amapiano</Data></Cell>
+    <Cell><Data ss:Type="String">South African Style</Data></Cell>
+    <Cell><Data ss:Type="String">Chill / Dance</Data></Cell>
+    <Cell><Data ss:Type="String">TikTok / Club</Data></Cell>
+    <Cell><Data ss:Type="String">amapiano, log drum, afro, chill, groove</Data></Cell>
+    <Cell><Data ss:Type="String">amapiano beat, 112 BPM, deep log drum bounce, airy chords, smooth percussion, minimal vocals</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Pluggnb Soft Ambient Beat</Data></Cell>
+    <Cell><Data ss:Type="String">Pluggnb</Data></Cell>
+    <Cell><Data ss:Type="String">Modern Internet Rap</Data></Cell>
+    <Cell><Data ss:Type="String">Dreamy / Soft</Data></Cell>
+    <Cell><Data ss:Type="String">Rapper / Hook</Data></Cell>
+    <Cell><Data ss:Type="String">pluggnb, dreamy, soft synth, ambient, melodic</Data></Cell>
+    <Cell><Data ss:Type="String">pluggnb dreamy beat, 145 BPM, airy synth bells, soft pads, bouncy hi-hats, emotional vibe</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Rage Hyperpop Beat</Data></Cell>
+    <Cell><Data ss:Type="String">Rage</Data></Cell>
+    <Cell><Data ss:Type="String">Yeat Style</Data></Cell>
+    <Cell><Data ss:Type="String">Energetic / Dark</Data></Cell>
+    <Cell><Data ss:Type="String">Rap / TikTok</Data></Cell>
+    <Cell><Data ss:Type="String">rage, yeat type, synth lead, fast, aggressive</Data></Cell>
+    <Cell><Data ss:Type="String">rage hyperpop beat, 148 BPM, distorted synths, powerful 808s, energetic drums, glitch textures</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Ambient Sleep Drone</Data></Cell>
+    <Cell><Data ss:Type="String">Ambient</Data></Cell>
+    <Cell><Data ss:Type="String">Minimal</Data></Cell>
+    <Cell><Data ss:Type="String">Calm / Sleep</Data></Cell>
+    <Cell><Data ss:Type="String">Sleep / Meditation</Data></Cell>
+    <Cell><Data ss:Type="String">ambient, sleep, drone, calm, meditation</Data></Cell>
+    <Cell><Data ss:Type="String">ambient drone texture, 60 BPM, soft pads, slow evolving atmospheres, minimal structure, sleep friendly</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Corporate Background Music</Data></Cell>
+    <Cell><Data ss:Type="String">Corporate</Data></Cell>
+    <Cell><Data ss:Type="String">Clean Digital</Data></Cell>
+    <Cell><Data ss:Type="String">Inspiring / Light</Data></Cell>
+    <Cell><Data ss:Type="String">Business / Presentation</Data></Cell>
+    <Cell><Data ss:Type="String">corporate, background, inspiring, light, clean</Data></Cell>
+    <Cell><Data ss:Type="String">corporate background music, 118 BPM, muted plucks, soft piano, minimal drums, uplifting clean sound</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Synthwave Night Drive</Data></Cell>
+    <Cell><Data ss:Type="String">Synthwave</Data></Cell>
+    <Cell><Data ss:Type="String">80s Retro</Data></Cell>
+    <Cell><Data ss:Type="String">Nostalgic / Cool</Data></Cell>
+    <Cell><Data ss:Type="String">YouTube / Spotify</Data></Cell>
+    <Cell><Data ss:Type="String">synthwave, retro, 80s, driving, neon</Data></Cell>
+    <Cell><Data ss:Type="String">synthwave 80s style beat, 108 BPM, analog synth bass, retro drums, neon pads, night drive vibe</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Bossa Nova Chill Guitar</Data></Cell>
+    <Cell><Data ss:Type="String">Acoustic</Data></Cell>
+    <Cell><Data ss:Type="String">Latin Bossa</Data></Cell>
+    <Cell><Data ss:Type="String">Chill / Warm</Data></Cell>
+    <Cell><Data ss:Type="String">Cafe / Vlog</Data></Cell>
+    <Cell><Data ss:Type="String">bossa nova, guitar, chill, latin, cafe</Data></Cell>
+    <Cell><Data ss:Type="String">bossa nova chill guitar beat, 95 BPM, soft percussion, warm chords, smooth acoustic guitar</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Japanese City Pop Groove</Data></Cell>
+    <Cell><Data ss:Type="String">City Pop</Data></Cell>
+    <Cell><Data ss:Type="String">Retro Japanese</Data></Cell>
+    <Cell><Data ss:Type="String">Happy / Nostalgic</Data></Cell>
+    <Cell><Data ss:Type="String">TikTok / Retro</Data></Cell>
+    <Cell><Data ss:Type="String">city pop, japanese, retro, 80s funk</Data></Cell>
+    <Cell><Data ss:Type="String">city pop retro beat, 112 BPM, funky bassline, bright chords, retro drums, upbeat summer vibe</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Emotional Guitar Trap</Data></Cell>
+    <Cell><Data ss:Type="String">Trap</Data></Cell>
+    <Cell><Data ss:Type="String">Acoustic Trap</Data></Cell>
+    <Cell><Data ss:Type="String">Sad / Emotional</Data></Cell>
+    <Cell><Data ss:Type="String">Rap / Singing</Data></Cell>
+    <Cell><Data ss:Type="String">guitar trap, emotional, sad, melodic</Data></Cell>
+    <Cell><Data ss:Type="String">emotional guitar trap beat, 145 BPM, sad guitar melody, clean 808s, melodic trap drums</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Documentary Background Ambient</Data></Cell>
+    <Cell><Data ss:Type="String">Cinematic</Data></Cell>
+    <Cell><Data ss:Type="String">Minimal Documentary</Data></Cell>
+    <Cell><Data ss:Type="String">Calm / Neutral</Data></Cell>
+    <Cell><Data ss:Type="String">Documentary</Data></Cell>
+    <Cell><Data ss:Type="String">documentary, ambient, neutral, minimal</Data></Cell>
+    <Cell><Data ss:Type="String">documentary ambient background, 70 BPM, soft textures, light pads, neutral mood</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Happy Ukulele Commercial</Data></Cell>
+    <Cell><Data ss:Type="String">Acoustic</Data></Cell>
+    <Cell><Data ss:Type="String">Corporate Fun</Data></Cell>
+    <Cell><Data ss:Type="String">Happy / Cute</Data></Cell>
+    <Cell><Data ss:Type="String">Ads / Commercial</Data></Cell>
+    <Cell><Data ss:Type="String">ukulele, fun, happy, cute, commercial</Data></Cell>
+    <Cell><Data ss:Type="String">happy ukulele commercial music, 120 BPM, claps, bells, bright ukulele, playful vibe</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Tech Futuristic Corporate</Data></Cell>
+    <Cell><Data ss:Type="String">Electronic</Data></Cell>
+    <Cell><Data ss:Type="String">Digital Tech</Data></Cell>
+    <Cell><Data ss:Type="String">Modern / Clean</Data></Cell>
+    <Cell><Data ss:Type="String">Product Video</Data></Cell>
+    <Cell><Data ss:Type="String">tech, futuristic, digital, corporate</Data></Cell>
+    <Cell><Data ss:Type="String">futuristic tech corporate beat, 120 BPM, digital plucks, minimal bass, clean percussion</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Meditation Tibetan Bowl</Data></Cell>
+    <Cell><Data ss:Type="String">Meditation</Data></Cell>
+    <Cell><Data ss:Type="String">Healing</Data></Cell>
+    <Cell><Data ss:Type="String">Relax / Deep</Data></Cell>
+    <Cell><Data ss:Type="String">Meditation App</Data></Cell>
+    <Cell><Data ss:Type="String">meditation, tibetan bowl, healing, relax</Data></Cell>
+    <Cell><Data ss:Type="String">meditation soundscape with tibetan bowls, very slow tempo, deep resonance, peaceful atmosphere</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Dark Drill UK</Data></Cell>
+    <Cell><Data ss:Type="String">Drill</Data></Cell>
+    <Cell><Data ss:Type="String">UK Drill</Data></Cell>
+    <Cell><Data ss:Type="String">Dark / Aggressive</Data></Cell>
+    <Cell><Data ss:Type="String">Rap / Freestyle</Data></Cell>
+    <Cell><Data ss:Type="String">uk drill, dark, aggressive, sliding 808</Data></Cell>
+    <Cell><Data ss:Type="String">UK drill beat, 142 BPM, sliding 808s, choir stabs, tense drums, dark street vibe</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Soft Guitar Lofi</Data></Cell>
+    <Cell><Data ss:Type="String">Lo-fi</Data></Cell>
+    <Cell><Data ss:Type="String">Guitar Lofi</Data></Cell>
+    <Cell><Data ss:Type="String">Warm / Chill</Data></Cell>
+    <Cell><Data ss:Type="String">Study / Vlog</Data></Cell>
+    <Cell><Data ss:Type="String">lofi, guitar, warm, soft drums</Data></Cell>
+    <Cell><Data ss:Type="String">guitar lofi beat, 82 BPM, soft drums, warm vinyl effect, chill acoustic guitar</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Epic Trailer Score</Data></Cell>
+    <Cell><Data ss:Type="String">Cinematic</Data></Cell>
+    <Cell><Data ss:Type="String">Epic Orchestral</Data></Cell>
+    <Cell><Data ss:Type="String">Epic / Powerful</Data></Cell>
+    <Cell><Data ss:Type="String">Trailer</Data></Cell>
+    <Cell><Data ss:Type="String">epic, trailer, orchestral, big drums</Data></Cell>
+    <Cell><Data ss:Type="String">epic orchestral trailer, 90 BPM, huge percussion, brass, strings, dramatic build-up</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <Selected/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>26</ActiveRow>
+     <ActiveCol>2</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+</Workbook>

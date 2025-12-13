@@ -1,0 +1,54 @@
+# Node modules
+node_modules/
+npm-debug.log
+
+# Build output
+dist/
+
+# Development files
+.env
+.env.local
+.env.development
+.env.test
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# Tests
+tests/
+**/*.test.ts
+coverage/
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Output files (will be generated in container)
+output/
+
+# Backups
+backups/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Kiro specs
+.kiro/

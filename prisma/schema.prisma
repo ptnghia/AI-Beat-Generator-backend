@@ -1,0 +1,164 @@
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model ApiKey {
+  id              String   @id @default(uuid())
+  key             String   @unique
+  status          String   @default("active") // active, exhausted, error
+  quotaRemaining  Int      @default(0)
+  lastUsed        DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  beats           Beat[]
+  prompts         PromptRecord[]
+  
+  @@index([status, lastUsed])
+  @@map("api_keys")
+}
+
+model BeatTemplate {
+  id            String   @id @default(uuid())
+  categoryName  String   @unique
+  genre         String
+  style         String
+  mood          String
+  useCase       String
+  tags          Json     // string[]
+  basePrompt    String   @db.Text
+  isActive      Boolean  @default(true)
+  lastUsed      DateTime?
+  xmlChecksum   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  beats         Beat[]
+  prompts       PromptRecord[]
+  
+  @@index([genre, style, mood])
+  @@index([lastUsed])
+  @@index([isActive])
+  @@map("beat_templates")
+}
+
+model Beat {
+  id                String   @id @default(uuid())
+  templateId        String
+  name              String   @unique
+  genre             String
+  style             String
+  mood              String
+  useCase           String
+  tags              Json     // string[]
+  description       String   @db.Text
+  fileUrl           String   // MP3 file path (320kbps)
+  basePrompt        String   @db.Text
+  normalizedPrompt  String   @db.Text
+  conceptData       Json     // ConceptData
+  apiKeyUsed        String
+  bpm               Int?     // Detected BPM (beats per minute)
+  musicalKey        String?  // Musical key (e.g., "C Minor", "F# Major")
+  coverArtPath      String?  // Path to cover art (3000x3000px PNG)
+  previewPath       String?  // Path to 30-second preview (128kbps MP3)
+  pricing           Json?    // Pricing tiers data
+  
+  // Multiple tracks support (Suno returns 2 tracks)
+  alternateFileUrl  String?  // Second MP3 track from Suno
+  alternateAudioId  String?  // Second audio ID for WAV conversion
+  
+  // WAV conversion (on-demand)
+  wavUrl            String?  // WAV file path (44.1kHz 16-bit) - only created when requested
+  wavConversionStatus String? @default("not_started") // not_started, processing, completed, failed
+  wavTaskId         String?  // Suno WAV conversion task ID
+  sunoTaskId        String?  // Original Suno music generation task ID
+  sunoAudioId       String?  // Original Suno audio ID (for WAV conversion)
+  
+  // Generation tracking
+  generationStatus  String   @default("pending") // pending, completed, failed
+  filesUploaded     Boolean  @default(false) // True if files manually uploaded
+  
+  createdAt         DateTime @default(now())
+  
+  template          BeatTemplate @relation(fields: [templateId], references: [id])
+  apiKey            ApiKey       @relation(fields: [apiKeyUsed], references: [id])
+  
+  @@index([genre, style, mood])
+  @@index([createdAt])
+  @@index([templateId])
+  @@index([musicalKey])
+  @@index([generationStatus])
+  @@map("beats")
+}
+
+model PromptRecord {
+  id                String   @id @default(uuid())
+  templateId        String
+  version           Int
+  basePrompt        String   @db.Text
+  normalizedPrompt  String   @db.Text
+  conceptData       Json     // ConceptData
+  tags              Json     // string[]
+  apiKeyUsed        String
+  executionResult   String   // success, failure
+  errorMessage      String?  @db.Text
+  createdAt         DateTime @default(now())
+  
+  template          BeatTemplate @relation(fields: [templateId], references: [id])
+  apiKey            ApiKey       @relation(fields: [apiKeyUsed], references: [id])
+  
+  @@index([templateId, createdAt])
+  @@index([executionResult])
+  @@map("prompt_records")
+}
+
+model ExecutionLog {
+  id            String   @id @default(uuid())
+  level         String   // ERROR, WARN, INFO, DEBUG
+  service       String
+  message       String   @db.Text
+  context       Json?
+  stackTrace    String?  @db.Text
+  createdAt     DateTime @default(now())
+  
+  @@index([level, createdAt])
+  @@index([service, createdAt])
+  @@map("execution_logs")
+}
+
+model DailySummary {
+  id                String   @id @default(uuid())
+  date              DateTime @unique @db.Date
+  beatsCreated      Int      @default(0)
+  beatsSucceeded    Int      @default(0)
+  beatsFailed       Int      @default(0)
+  errorRate         Float    @default(0)
+  activeApiKeys     Int      @default(0)
+  exhaustedApiKeys  Int      @default(0)
+  createdAt         DateTime @default(now())
+  
+  @@index([date])
+  @@map("daily_summaries")
+}
+
+model AdminUser {
+  id            String   @id @default(uuid())
+  username      String   @unique
+  email         String   @unique
+  passwordHash  String
+  role          String   @default("admin") // admin, super_admin
+  lastLoginAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([username])
+  @@index([email])
+  @@map("admin_users")
+}
