@@ -1,0 +1,88 @@
+{
+  "project": {
+    "id": 40,
+    "name": "AI Beat Generator",
+    "description": "Automated AI-powered beat generation system using Suno API with intelligent prompt engineering and multi-track support",
+    "version": "1.0.0",
+    "status": "active",
+    "created_date": "2024-12-13",
+    "last_updated": "2024-12-13",
+    "repository": "https://github.com/ptnghia/AI-Beat-Generator-backend.git"
+  },
+  "technical": {
+    "framework": "Node.js + Express + TypeScript",
+    "language": ["TypeScript", "JavaScript"],
+    "database": ["PostgreSQL", "Prisma ORM"],
+    "deployment": "pm2",
+    "key_dependencies": [
+      "express",
+      "prisma",
+      "@prisma/client",
+      "openai",
+      "axios",
+      "fluent-ffmpeg",
+      "bcryptjs",
+      "jsonwebtoken"
+    ]
+  },
+  "ports": {
+    "main_api": 4000,
+    "admin_panel": 4060,
+    "monitoring": 4070,
+    "testing": 4080,
+    "range": "4000-4099"
+  },
+  "database": {
+    "postgresql": {
+      "database": "ai_beat_generator",
+      "user": "beat_gen_user",
+      "host": "localhost",
+      "port": 5432,
+      "schema": "public"
+    }
+  },
+  "directories": {
+    "project_root": "/home/lifetechadmin/opt/AI-Beat-Generator-backend",
+    "src": "/home/lifetechadmin/opt/AI-Beat-Generator-backend/src",
+    "output": "/home/lifetechadmin/opt/AI-Beat-Generator-backend/output",
+    "logs": "/home/lifetechadmin/opt/AI-Beat-Generator-backend/logs",
+    "prisma": "/home/lifetechadmin/opt/AI-Beat-Generator-backend/prisma"
+  },
+  "services": {
+    "api": {
+      "command": "npm run start:api",
+      "port": 4000,
+      "health_check": "http://localhost:4000/health",
+      "pm2_name": "ai-beat-generator-api"
+    },
+    "scheduler": {
+      "command": "npm run start",
+      "pm2_name": "ai-beat-generator-scheduler"
+    }
+  },
+  "environment": {
+    "NODE_ENV": "production",
+    "PORT": "4000",
+    "DATABASE_URL": "postgresql://beat_gen_user:secure_password@localhost:5432/ai_beat_generator"
+  },
+  "features": [
+    "AI-powered beat generation using Suno API",
+    "Intelligent prompt engineering with Gemini",
+    "Multi-track support (2 tracks per generation)",
+    "WAV conversion on-demand",
+    "Cover art generation (3000x3000px)",
+    "30-second preview generation",
+    "BPM and musical key detection",
+    "API key rotation and quota management",
+    "Automated scheduling with node-cron",
+    "Admin authentication with JWT",
+    "Comprehensive logging and monitoring"
+  ],
+  "notes": [
+    "Migrated from MySQL to PostgreSQL for consistency",
+    "Uses Project ID 40 (API/Database Services range)",
+    "Main API on port 4000",
+    "Requires external APIs: Suno, Gemini, OpenAI",
+    "Automated beat generation runs on configurable cron schedule"
+  ]
+}

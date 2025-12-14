@@ -1,6 +1,7 @@
 import { loggingService } from './logging.service';
 import * as fs from 'fs';
 import * as path from 'path';
+import ffmpeg from 'fluent-ffmpeg';
 
 /**
  * Preview Configuration
@@ -111,15 +112,7 @@ export class PreviewGeneratorService {
       const previewFileName = `${originalFileName}_preview.mp3`;
       const previewPath = path.join(this.config.outputDir, previewFileName);
 
-      // MOCK IMPLEMENTATION
-      // In production, this would:
-      // 1. Use FFmpeg to extract first 30 seconds
-      // 2. Convert to 128kbps MP3
-      // 3. Generate watermark audio using TTS
-      // 4. Mix watermark at intervals
-      // 5. Add ID3 tags with producer credit
-
-      loggingService.info('Generating preview (MOCK)', {
+      loggingService.info('Generating preview with FFmpeg', {
         service: 'PreviewGeneratorService',
         originalFile: originalFilePath,
         previewFile: previewPath,
@@ -127,27 +120,65 @@ export class PreviewGeneratorService {
         bitrate: this.config.bitrate
       });
 
-      // Simulate processing time
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Use FFmpeg to create 30-second preview
+      await new Promise<void>((resolve, reject) => {
+        ffmpeg(originalFilePath)
+          .setStartTime(0)
+          .setDuration(this.config.duration)
+          .audioBitrate(this.config.bitrate)
+          .audioChannels(2)
+          .audioFrequency(44100)
+          .format('mp3')
+          .on('start', (commandLine) => {
+            loggingService.info('FFmpeg command started', {
+              service: 'PreviewGeneratorService',
+              command: commandLine
+            });
+          })
+          .on('progress', (progress) => {
+            if (progress.percent) {
+              loggingService.info('Preview generation progress', {
+                service: 'PreviewGeneratorService',
+                percent: Math.round(progress.percent)
+              });
+            }
+          })
+          .on('end', () => {
+            loggingService.info('FFmpeg processing completed', {
+              service: 'PreviewGeneratorService',
+              output: previewPath
+            });
+            resolve();
+          })
+          .on('error', (err) => {
+            loggingService.error('FFmpeg processing failed', {
+              service: 'PreviewGeneratorService',
+              error: err.message
+            });
+            reject(err);
+          })
+          .save(previewPath);
+      });
 
-      // For now, just copy the file (in production, would process with FFmpeg)
-      // fs.copyFileSync(originalFilePath, previewPath);
+      // Get file size
+      const stats = fs.statSync(previewPath);
+      const fileSizeMB = (stats.size / (1024 * 1024)).toFixed(2);
 
-      // Mock result
       const result: PreviewResult = {
         success: true,
         previewPath: previewPath,
         originalPath: originalFilePath,
         duration: this.config.duration,
         bitrate: this.config.bitrate,
-        fileSize: 0 // Would be actual file size in production
+        fileSize: stats.size
       };
 
       const executionTime = Date.now() - startTime;
-      loggingService.info('Preview generated successfully (MOCK)', {
+      loggingService.info('Preview generated successfully', {
         service: 'PreviewGeneratorService',
         beatName,
         previewPath,
+        fileSize: `${fileSizeMB} MB`,
         executionTime
       });
 

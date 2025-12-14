@@ -81,6 +81,8 @@ const upload = multer({
  * - mp3: MP3 file (optional)
  * - wav: WAV file (optional)
  * - cover: Cover image (optional, PNG/JPG)
+ * - versionNumber: Version number (optional, auto-increment if not provided)
+ * - setPrimary: Set as primary version (optional, boolean)
  */
 router.post('/:id/upload',
   upload.fields([
@@ -92,10 +94,12 @@ router.post('/:id/upload',
     try {
       const beatId = req.params.id;
       const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+      const { versionNumber, setPrimary = 'false' } = req.body;
 
       // Check if beat exists
       const beat = await prisma.beat.findUnique({
-        where: { id: beatId }
+        where: { id: beatId },
+        include: { versions: { orderBy: { versionNumber: 'desc' } } }
       });
 
       if (!beat) {
@@ -113,17 +117,25 @@ router.post('/:id/upload',
         });
       }
 
-      const updateData: any = {
-        filesUploaded: true
-      };
+      // Determine version number
+      const nextVersionNumber = versionNumber
+        ? parseInt(versionNumber)
+        : (beat.versions.length > 0 ? beat.versions[0].versionNumber + 1 : 1);
 
       const uploadedFiles: any = {};
+      const versionData: any = {
+        beatId,
+        versionNumber: nextVersionNumber,
+        source: 'upload',
+        status: 'completed',
+        isPrimary: setPrimary === 'true',
+        filesDownloaded: true
+      };
 
       // Process MP3
       if (files.mp3 && files.mp3.length > 0) {
         const mp3File = files.mp3[0];
-        updateData.fileUrl = mp3File.path;
-        updateData.generationStatus = 'completed';
+        versionData.fileUrl = mp3File.path;
         uploadedFiles.mp3 = mp3File.path;
         
         loggingService.info('MP3 file uploaded', {
@@ -137,8 +149,8 @@ router.post('/:id/upload',
       // Process WAV
       if (files.wav && files.wav.length > 0) {
         const wavFile = files.wav[0];
-        updateData.wavUrl = wavFile.path;
-        updateData.wavConversionStatus = 'completed';
+        versionData.wavUrl = wavFile.path;
+        versionData.wavConversionStatus = 'completed';
         uploadedFiles.wav = wavFile.path;
         
         loggingService.info('WAV file uploaded', {
@@ -152,7 +164,7 @@ router.post('/:id/upload',
       // Process Cover
       if (files.cover && files.cover.length > 0) {
         const coverFile = files.cover[0];
-        updateData.coverArtPath = coverFile.path;
+        versionData.coverArtPath = coverFile.path;
         uploadedFiles.cover = coverFile.path;
         
         loggingService.info('Cover image uploaded', {
@@ -163,16 +175,37 @@ router.post('/:id/upload',
         });
       }
 
-      // Update beat record
+      // Create new version
+      const version = await prisma.beatVersion.create({
+        data: versionData
+      });
+
+      // If setPrimary, update other versions
+      if (setPrimary === 'true') {
+        await prisma.beatVersion.updateMany({
+          where: {
+            beatId,
+            id: { not: version.id }
+          },
+          data: { isPrimary: false }
+        });
+      }
+
+      // Update beat filesUploaded flag
       await prisma.beat.update({
         where: { id: beatId },
-        data: updateData
+        data: { filesUploaded: true }
       });
 
       res.status(200).json({
         status: 'success',
         message: 'Files uploaded successfully',
         beatId,
+        version: {
+          id: version.id,
+          versionNumber: version.versionNumber,
+          isPrimary: version.isPrimary
+        },
         uploadedFiles
       });
 

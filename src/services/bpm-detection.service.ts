@@ -21,10 +21,16 @@ export class BPMDetectionService {
    */
   async detectBPM(audioFilePath: string): Promise<BPMDetectionResult> {
     const startTime = Date.now();
+    let tempWavPath: string | null = null;
 
     try {
       if (!fs.existsSync(audioFilePath)) {
         throw new Error(`Audio file not found: ${audioFilePath}`);
+      }
+
+      // Calculate temp WAV path for cleanup
+      if (!audioFilePath.endsWith('.wav')) {
+        tempWavPath = audioFilePath.replace(/\.[^.]+$/, '_temp.wav');
       }
 
       loggingService.info('Starting BPM detection', {
@@ -80,6 +86,24 @@ export class BPMDetectionService {
         filePath: audioFilePath
       });
       throw error;
+    } finally {
+      // ✅ ALWAYS cleanup temp WAV file
+      if (tempWavPath && fs.existsSync(tempWavPath)) {
+        try {
+          fs.unlinkSync(tempWavPath);
+          loggingService.info('Cleaned up temp WAV file', {
+            service: 'BPMDetectionService',
+            tempFile: path.basename(tempWavPath),
+            size: '~20MB'
+          });
+        } catch (cleanupError) {
+          loggingService.warn('Failed to cleanup temp WAV file', {
+            service: 'BPMDetectionService',
+            tempFile: tempWavPath,
+            error: cleanupError instanceof Error ? cleanupError.message : String(cleanupError)
+          });
+        }
+      }
     }
   }
 

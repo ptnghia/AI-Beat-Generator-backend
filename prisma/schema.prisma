@@ -5,7 +5,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -74,12 +74,26 @@ model Beat {
   alternateFileUrl  String?  // Second MP3 track from Suno
   alternateAudioId  String?  // Second audio ID for WAV conversion
   
+  // Alternate track metadata (track 2)
+  alternateDuration Float?   // Duration of second track
+  alternateModelName String? // Model used for second track
+  alternateSunoAudioUrl String? // Audio URL for second track
+  alternateSunoImageUrl String? // Image URL for second track
+  alternateSunoStreamUrl String? // Stream URL for second track
+  
   // WAV conversion (on-demand)
   wavUrl            String?  // WAV file path (44.1kHz 16-bit) - only created when requested
   wavConversionStatus String? @default("not_started") // not_started, processing, completed, failed
   wavTaskId         String?  // Suno WAV conversion task ID
   sunoTaskId        String?  // Original Suno music generation task ID
   sunoAudioId       String?  // Original Suno audio ID (for WAV conversion)
+  
+  // Suno API response data
+  duration          Float?   // Audio duration in seconds from Suno
+  modelName         String?  // Suno model used (e.g., "chirp-v3-5", "chirp-v4")
+  sunoAudioUrl      String?  // Direct audio URL from Suno CDN
+  sunoImageUrl      String?  // Cover image URL from Suno
+  sunoStreamUrl     String?  // Streaming audio URL from Suno
   
   // Generation tracking
   generationStatus  String   @default("pending") // pending, completed, failed
@@ -96,6 +110,51 @@ model Beat {
   @@index([musicalKey])
   @@index([generationStatus])
   @@map("beats")
+  
+  versions      BeatVersion[]
+}
+
+model BeatVersion {
+  id                String   @id @default(uuid())
+  beatId            String
+  versionNumber     Int
+  source            String   @default("suno") // 'suno', 'upload', 'suno_retry'
+  isPrimary         Boolean  @default(false)
+  status            String   @default("pending") // 'pending', 'processing', 'completed', 'failed'
+  
+  // Audio files (local storage - optional, lazy download)
+  fileUrl           String?  // Local MP3 file path (if downloaded)
+  wavUrl            String?  // Local WAV file path (if converted)
+  coverArtPath      String?  // Cover image path
+  
+  // Suno URLs (primary source - always available)
+  sunoAudioUrl      String?  // Direct audio URL from Suno CDN
+  sunoImageUrl      String?  // Cover image URL from Suno
+  sunoStreamUrl     String?  // Streaming audio URL
+  sunoAudioId       String?  // Suno audio ID
+  sunoTaskId        String?  // Suno task ID
+  
+  // Metadata
+  duration          Float?   // Audio duration in seconds
+  modelName         String?  // Suno model (e.g., "chirp-v3-5", "chirp-v4")
+  bpm               Int?     // Detected BPM
+  musicalKey        String?  // Musical key
+  
+  // File management
+  filesDownloaded   Boolean  @default(false) // True if files downloaded locally
+  wavConversionStatus String? @default("not_started") // 'not_started', 'processing', 'completed', 'failed'
+  wavTaskId         String?  // WAV conversion task ID
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  beat              Beat     @relation(fields: [beatId], references: [id], onDelete: Cascade)
+  
+  @@unique([beatId, versionNumber])
+  @@index([beatId])
+  @@index([isPrimary])
+  @@index([status])
+  @@map("beat_versions")
 }
 
 model PromptRecord {

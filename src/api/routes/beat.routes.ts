@@ -265,6 +265,13 @@ router.post('/:id/retry-generation', async (req: Request, res: Response, next: N
     // Get API key
     const apiKey = await apiKeyManager.selectKey();
 
+    if (!apiKey) {
+      return res.status(503).json({
+        error: 'Service Unavailable',
+        message: 'No API keys available'
+      });
+    }
+
     loggingService.info('Retrying music generation', {
       service: 'BeatRoutes',
       beatId: id,
@@ -374,19 +381,18 @@ router.post('/:id/enhance', async (req: Request, res: Response, next: NextFuncti
 
           const wavResult = await wavConversionService.convertAndDownload(
             beat.sunoAudioId,
-            id
+            id,
+            beat.name
           );
 
           await beatRepository.updateBeat(id, {
-            wavUrl: wavResult.relativePath,
-            wavConversionStatus: 'completed',
-            wavTaskId: wavResult.wavTaskId
+            wavUrl: wavResult,
+            wavConversionStatus: 'completed'
           });
 
           results.wav = {
             status: 'success',
-            path: wavResult.relativePath,
-            taskId: wavResult.wavTaskId
+            path: wavResult
           };
 
         } catch (error) {
@@ -502,11 +508,7 @@ router.get('/pending/list', async (req: Request, res: Response, next: NextFuncti
     const [beats, total] = await Promise.all([
       prisma.beat.findMany({
         where: {
-          OR: [
-            { fileUrl: '' },
-            { fileUrl: null },
-            { generationStatus: 'pending' }
-          ]
+          generationStatus: 'pending'
         },
         orderBy: { createdAt: 'desc' },
         skip: (pageNum - 1) * limitNum,
@@ -523,11 +525,7 @@ router.get('/pending/list', async (req: Request, res: Response, next: NextFuncti
       }),
       prisma.beat.count({
         where: {
-          OR: [
-            { fileUrl: '' },
-            { fileUrl: null },
-            { generationStatus: 'pending' }
-          ]
+          generationStatus: 'pending'
         }
       })
     ]);

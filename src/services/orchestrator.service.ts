@@ -45,9 +45,13 @@ export class OrchestratorService {
   /**
    * Generate a complete beat through the full workflow
    * @param templateId Optional template ID to use (if not provided, will select automatically)
+   * @param options Generation options
    */
-  async generateBeat(templateId?: string): Promise<Beat> {
+  async generateBeat(templateId?: string, options?: {
+    skipAudio?: boolean;  // If true, only create metadata, skip Suno API
+  }): Promise<Beat> {
     const startTime = Date.now();
+    const skipAudio = options?.skipAudio || false;
 
     try {
       loggingService.info('Starting beat generation workflow', {
@@ -117,115 +121,125 @@ export class OrchestratorService {
       loggingService.info('Prompts optimized', {
         service: 'OrchestratorService',
         sunoPromptLength: promptOptimization.sunoPrompt.length,
-        beatstarsTitle: promptOptimization.beatstarsTitle
+        beatstarsTitle: promptOptimization.beatstarsTitle,
+        skipAudio
       });
 
-      // Step 5: Generate music using Suno-optimized prompt (can return 2 tracks)
-      const { jobId, fileUrl, audioId, alternateFileUrl, alternateAudioId } = await this.musicService.generateMusic(
-        promptOptimization.sunoPrompt,
-        apiKey.key
-      );
-
-      // Step 5.5: Download and save both files locally
-      let localFilePath = fileUrl;
+      // Initialize variables
+      let jobId: string | undefined;
+      let fileUrl: string | undefined;
+      let audioId: string | undefined;
+      let alternateFileUrl: string | undefined;
+      let alternateAudioId: string | undefined;
+      let localFilePath: string | undefined;
       let alternateLocalFilePath: string | undefined;
-      
-      try {
-        if (fileUrl && fileUrl.startsWith('http')) {
-          localFilePath = await this.musicService.downloadAndSaveFile(fileUrl, jobId);
-          loggingService.info('Primary audio file saved locally', {
-            service: 'OrchestratorService',
-            localPath: localFilePath
-          });
-        }
-        
-        // Download second track if available
-        if (alternateFileUrl && alternateFileUrl.startsWith('http')) {
-          alternateLocalFilePath = await this.musicService.downloadAndSaveFile(
-            alternateFileUrl, 
-            `${jobId}_alt`
-          );
-          loggingService.info('Alternate audio file saved locally', {
-            service: 'OrchestratorService',
-            localPath: alternateLocalFilePath
-          });
-        }
-      } catch (error) {
-        loggingService.error('Failed to download audio file, using remote URL', {
-          service: 'OrchestratorService',
-          error: error instanceof Error ? error.message : String(error)
-        });
-        // Continue with remote URL if download fails
-      }
-
-      // Step 6: Detect BPM from generated audio
-      let bpmData: { bpm: number; confidence: number; method: string } = { bpm: 0, confidence: 0, method: 'estimated' };
-      try {
-        if (localFilePath && fs.existsSync(localFilePath)) {
-          bpmData = await this.bpmDetectionService.detectBPM(localFilePath);
-          loggingService.info('BPM detected', {
-            service: 'OrchestratorService',
-            bpm: bpmData.bpm,
-            method: bpmData.method
-          });
-        }
-      } catch (error) {
-        loggingService.warn('BPM detection failed, using estimate', {
-          service: 'OrchestratorService',
-          error: error instanceof Error ? error.message : String(error)
-        });
-      }
-
-      // Step 7: Detect musical key
-      let keyData: { key: string; confidence: number; method: string; keyLetter: string; mode: string } = { 
-        key: 'C Major', 
-        confidence: 0.5, 
-        method: 'estimated', 
-        keyLetter: 'C', 
-        mode: 'Major' 
-      };
-      try {
-        keyData = await this.keyDetectionService.detectKey({
-          genre: beatTemplate.genre,
-          mood: beatTemplate.mood,
-          style: beatTemplate.style
-        });
-        loggingService.info('Key detected', {
-          service: 'OrchestratorService',
-          key: keyData.key,
-          method: keyData.method
-        });
-      } catch (error) {
-        loggingService.warn('Key detection failed, using default', {
-          service: 'OrchestratorService',
-          error: error instanceof Error ? error.message : String(error)
-        });
-      }
-
-      // Step 8: Generate preview clip (30 seconds)
       let previewPath: string | undefined;
-      try {
-        if (localFilePath && fs.existsSync(localFilePath)) {
-          const previewResult = await this.previewGeneratorService.generatePreview(
-            localFilePath,
-            './output/previews',
-            jobId
-          );
-          if (previewResult.success && previewResult.previewPath) {
-            previewPath = previewResult.previewPath;
-            loggingService.info('Preview generated', {
+      let bpmData = { bpm: 120, confidence: 0.5, method: 'estimated' };
+      let keyData = { key: 'C Major', confidence: 0.5, method: 'estimated', keyLetter: 'C', mode: 'Major' };
+
+      // Step 5: Generate music (conditional based on skipAudio)
+      if (!skipAudio) {
+        const musicResult = await this.musicService.generateMusic(
+          promptOptimization.sunoPrompt,
+          apiKey.key
+        );
+        jobId = musicResult.jobId;
+        fileUrl = musicResult.fileUrl;
+        audioId = musicResult.audioId;
+        alternateFileUrl = musicResult.alternateFileUrl;
+        alternateAudioId = musicResult.alternateAudioId;
+
+        // Step 5.5: Download and save both files locally
+        localFilePath = fileUrl;
+      
+        try {
+          if (fileUrl && fileUrl.startsWith('http')) {
+            localFilePath = await this.musicService.downloadAndSaveFile(fileUrl, jobId);
+            loggingService.info('Primary audio file saved locally', {
               service: 'OrchestratorService',
-              previewPath,
-              duration: previewResult.duration
+              localPath: localFilePath
             });
           }
+          
+          // Download second track if available
+          if (alternateFileUrl && alternateFileUrl.startsWith('http')) {
+            alternateLocalFilePath = await this.musicService.downloadAndSaveFile(
+              alternateFileUrl, 
+              `${jobId}_alt`
+            );
+            loggingService.info('Alternate audio file saved locally', {
+              service: 'OrchestratorService',
+              localPath: alternateLocalFilePath
+            });
+          }
+        } catch (error) {
+          loggingService.error('Failed to download audio file, using remote URL', {
+            service: 'OrchestratorService',
+            error: error instanceof Error ? error.message : String(error)
+          });
+          // Continue with remote URL if download fails
         }
-      } catch (error) {
-        loggingService.warn('Preview generation failed, continuing without it', {
-          service: 'OrchestratorService',
-          error: error instanceof Error ? error.message : String(error)
-        });
-      }
+
+        // Step 6: Detect BPM from generated audio
+        try {
+          if (localFilePath && fs.existsSync(localFilePath)) {
+            bpmData = await this.bpmDetectionService.detectBPM(localFilePath);
+            loggingService.info('BPM detected', {
+              service: 'OrchestratorService',
+              bpm: bpmData.bpm,
+              method: bpmData.method
+            });
+          }
+        } catch (error) {
+          loggingService.warn('BPM detection failed, using estimate', {
+            service: 'OrchestratorService',
+            error: error instanceof Error ? error.message : String(error)
+          });
+        }
+
+        // Step 7: Detect musical key
+        try {
+          keyData = await this.keyDetectionService.detectKey({
+            genre: beatTemplate.genre,
+            mood: beatTemplate.mood,
+            style: beatTemplate.style
+          });
+          loggingService.info('Key detected', {
+            service: 'OrchestratorService',
+            key: keyData.key,
+            method: keyData.method
+          });
+        } catch (error) {
+          loggingService.warn('Key detection failed, using default', {
+            service: 'OrchestratorService',
+            error: error instanceof Error ? error.message : String(error)
+          });
+        }
+
+        // Step 8: Generate preview clip (30 seconds)
+        try {
+          if (localFilePath && fs.existsSync(localFilePath)) {
+            const previewResult = await this.previewGeneratorService.generatePreview(
+              localFilePath,
+              './output/previews',
+              jobId
+            );
+            if (previewResult.success && previewResult.previewPath) {
+              previewPath = previewResult.previewPath;
+              loggingService.info('Preview generated', {
+                service: 'OrchestratorService',
+                previewPath,
+                duration: previewResult.duration
+              });
+            }
+          }
+        } catch (error) {
+          loggingService.warn('Preview generation failed, continuing without it', {
+            service: 'OrchestratorService',
+            error: error instanceof Error ? error.message : String(error)
+          });
+        }
+      } // End of if (!skipAudio)
 
       // Step 9: Generate metadata
       const metadata = await this.metadataService.generateMetadata(beatTemplate, promptOptimization.sunoPrompt);
@@ -287,14 +301,14 @@ export class OrchestratorService {
         conceptData,
         normalizedPrompt: promptOptimization.sunoPrompt,
         metadata,
-        fileUrl: localFilePath,
+        fileUrl: localFilePath || '',
         apiKeyId: apiKey.id,
         additionalTags: promptOptimization.additionalTags,
         coverArtPath,
         sunoTaskId: jobId,
         sunoAudioId: audioId,
-        alternateFileUrl: alternateLocalFilePath,
-        alternateAudioId,
+        alternateFileUrl: alternateLocalFilePath || null,
+        alternateAudioId: alternateAudioId || null,
         bpm: bpmData.bpm,
         musicalKey: keyData.key,
         beatstarsTags,

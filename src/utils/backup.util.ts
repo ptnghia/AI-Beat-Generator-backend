@@ -204,23 +204,26 @@ export class BackupUtil {
 export function createBackupUtil(): BackupUtil {
   const databaseUrl = process.env.DATABASE_URL || '';
   
-  // Support both with and without password: mysql://user:pass@host:port/db or mysql://user@host:port/db
-  const urlMatch = databaseUrl.match(/mysql:\/\/([^:@]+)(?::([^@]*))?@([^:]+):(\d+)\/(.+)/);
+  // Support both MySQL and PostgreSQL formats
+  const mysqlMatch = databaseUrl.match(/mysql:\/\/([^:@]+)(?::([^@]*))?@([^:]+):(\d+)\/(.+)/);
+  const postgresMatch = databaseUrl.match(/postgres(?:ql)?:\/\/([^:@]+)(?::([^@]*))?@([^:]+):(\d+)\/(.+)/);
+  
+  const urlMatch = mysqlMatch || postgresMatch;
 
   if (!urlMatch) {
     // For test environment, use default values
     if (process.env.NODE_ENV === 'test') {
       const config: BackupConfig = {
         host: 'localhost',
-        port: 3306,
+        port: 5432,
         database: 'test_db',
-        username: 'root',
+        username: 'postgres',
         password: '',
         backupDir: process.env.BACKUP_DIR || './backups'
       };
       return new BackupUtil(config);
     }
-    throw new Error('Invalid DATABASE_URL format. Expected: mysql://user[:password]@host:port/database');
+    throw new Error('Invalid DATABASE_URL format. Expected: postgresql://user[:password]@host:port/database or mysql://...');
   }
 
   const [, username, password = '', host, port, database] = urlMatch;

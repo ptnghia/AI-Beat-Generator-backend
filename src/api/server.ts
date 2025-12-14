@@ -13,6 +13,9 @@ import { statsRoutes } from './routes/stats.routes';
 
 const app: Express = express();
 
+// Trust proxy for reverse proxy setup (Nginx)
+app.set('trust proxy', 1);
+
 // Security middleware
 app.use(helmet());
 app.use(cors());
@@ -63,6 +66,14 @@ app.get('/health', (req: Request, res: Response) => {
 // API routes
 app.use('/api/beats', beatRoutes);
 app.use('/api/stats', statsRoutes);
+
+// Generation routes (manual beat generation)
+import generateRoutes from './routes/generate.routes';
+app.use('/api/generate', generateRoutes);
+
+// Beat action routes (generate-audio, download, versions)
+import beatActionRoutes from './routes/beat-actions.routes';
+app.use('/api/beats', beatActionRoutes);
 
 // Upload routes (for manual file uploads)
 import uploadRoutes from './routes/upload.routes';

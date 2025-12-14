@@ -27,13 +27,16 @@ interface SunoCallbackData {
     response?: {
       sunoData?: Array<{
         id: string;
-        audioUrl: string;
-        sourceAudioUrl: string;
-        imageUrl: string;
+        audio_url: string;  // Note: Suno uses snake_case
+        source_audio_url: string;
+        stream_audio_url?: string;
+        source_stream_audio_url?: string;
+        image_url: string;
+        source_image_url?: string;
         title: string;
         tags: string;
         duration: number;
-        modelName: string;
+        model_name: string;
       }>;
     };
     errorMessage?: string;
@@ -92,7 +95,7 @@ router.post('/suno', async (req: Request, res: Response) => {
           loggingService.info('First track available', {
             service: 'SunoCallbackRoute',
             taskId,
-            audioUrl: firstTrack.audioUrl,
+            audioUrl: firstTrack.audio_url,
             duration: firstTrack.duration
           });
         }
@@ -105,34 +108,187 @@ router.post('/suno', async (req: Request, res: Response) => {
           trackCount: response?.sunoData?.length || 0
         });
 
-        // Download và save file nếu có URL
+        // Extract and save metadata from Suno response (supports 2 tracks)
         if (response?.sunoData && response.sunoData.length > 0) {
-          const track = response.sunoData[0]; // Lấy track đầu tiên
-          
           try {
-            // Download file
-            const musicService = new MusicService();
-            const localPath = await musicService.downloadAndSaveFile(
-              track.audioUrl,
-              taskId
-            );
+            const track1 = response.sunoData[0];
+            const track2 = response.sunoData.length > 1 ? response.sunoData[1] : null;
 
-            loggingService.info('Audio file downloaded from callback', {
-              service: 'SunoCallbackRoute',
-              taskId,
-              localPath,
-              duration: track.duration
+            // Strategy: Tìm BeatVersion theo sunoTaskId (vì mỗi lần gọi có taskId riêng)
+            const existingVersions = await prisma.beatVersion.findMany({
+              where: { sunoTaskId: taskId },
+              include: { beat: true }
             });
 
-            // TODO: Update beat record với local path
-            // Cần có cách map taskId -> beatId
-            // Có thể thêm field taskId vào Beat model
+            if (existingVersions.length > 0) {
+              // Case 1: Đã có BeatVersion với taskId này (từ API tạo version)
+              // Update version hiện tại với metadata từ track 1
+              const version = existingVersions[0];
+              
+              await prisma.beatVersion.update({
+                where: { id: version.id },
+                data: {
+                  status: 'completed',
+                  sunoAudioUrl: track1.audio_url || track1.source_audio_url,
+                  sunoImageUrl: track1.image_url || track1.source_image_url,
+                  sunoStreamUrl: track1.stream_audio_url || track1.source_stream_audio_url,
+                  duration: track1.duration,
+                  modelName: track1.model_name
+                }
+              });
 
-          } catch (downloadError) {
-            loggingService.error('Failed to download audio from callback', {
+              // Update beat chính nếu đây là version primary
+              if (version.isPrimary) {
+                await prisma.beat.update({
+                  where: { id: version.beatId },
+                  data: {
+                    duration: track1.duration,
+                    modelName: track1.model_name,
+                    sunoAudioUrl: track1.audio_url || track1.source_audio_url,
+                    sunoImageUrl: track1.image_url || track1.source_image_url,
+                    sunoStreamUrl: track1.stream_audio_url || track1.source_stream_audio_url,
+                    generationStatus: 'completed'
+                  }
+                });
+              }
+
+              loggingService.info('BeatVersion updated from webhook', {
+                service: 'SunoCallbackRoute',
+                versionId: version.id,
+                versionNumber: version.versionNumber,
+                beatId: version.beatId,
+                taskId
+              });
+
+              // Nếu có track 2, tạo alternate version
+              if (track2 && existingVersions.length === 1) {
+                const nextVersionNumber = await prisma.beatVersion.count({
+                  where: { beatId: version.beatId }
+                }) + 1;
+
+                // Track 2 KHÔNG lưu sunoTaskId để tránh conflict với track 1
+                // sunoTaskId chỉ dùng để route webhook callback, track 2 được tạo cùng lúc với track 1
+                await prisma.beatVersion.create({
+                  data: {
+                    beatId: version.beatId,
+                    versionNumber: nextVersionNumber,
+                    source: 'suno',
+                    isPrimary: false,
+                    status: 'completed',
+                    sunoTaskId: null,  // KHÔNG lưu taskId cho track 2 (tránh conflict routing)
+                    sunoAudioId: track2.id,
+                    sunoAudioUrl: track2.audio_url || track2.source_audio_url,
+                    sunoImageUrl: track2.image_url || track2.source_image_url,
+                    sunoStreamUrl: track2.stream_audio_url || track2.source_stream_audio_url,
+                    duration: track2.duration,
+                    modelName: track2.model_name,
+                    filesDownloaded: false
+                  }
+                });
+
+                loggingService.info('Alternate BeatVersion created from webhook', {
+                  service: 'SunoCallbackRoute',
+                  versionNumber: nextVersionNumber,
+                  beatId: version.beatId,
+                  taskId
+                });
+              }
+
+            } else {
+              // Case 2: Chưa có BeatVersion, tìm beat theo sunoTaskId (old flow)
+              const beats = await prisma.beat.findMany({
+                where: { sunoTaskId: taskId },
+                include: { versions: true }
+              });
+
+              if (beats.length > 0) {
+                const beat = beats[0];
+                
+                // Update beat chính với metadata
+                await prisma.beat.update({
+                  where: { id: beat.id },
+                  data: {
+                    duration: track1.duration,
+                    modelName: track1.model_name,
+                    sunoAudioUrl: track1.audio_url || track1.source_audio_url,
+                    sunoImageUrl: track1.image_url || track1.source_image_url,
+                    sunoStreamUrl: track1.stream_audio_url || track1.source_stream_audio_url,
+                    generationStatus: 'completed',
+                    // Track 2 metadata
+                    alternateDuration: track2?.duration,
+                    alternateModelName: track2?.model_name,
+                    alternateSunoAudioUrl: track2 ? (track2.audio_url || track2.source_audio_url) : null,
+                    alternateSunoImageUrl: track2 ? (track2.image_url || track2.source_image_url) : null,
+                    alternateSunoStreamUrl: track2 ? (track2.stream_audio_url || track2.source_stream_audio_url) : null
+                  }
+                });
+
+                // Tạo BeatVersion cho track 1 (primary)
+                await prisma.beatVersion.create({
+                  data: {
+                    beatId: beat.id,
+                    versionNumber: 1,
+                    source: 'suno',
+                    isPrimary: true,
+                    status: 'completed',
+                    sunoTaskId: taskId,
+                    sunoAudioId: track1.id,
+                    sunoAudioUrl: track1.audio_url || track1.source_audio_url,
+                    sunoImageUrl: track1.image_url || track1.source_image_url,
+                    sunoStreamUrl: track1.stream_audio_url || track1.source_stream_audio_url,
+                    duration: track1.duration,
+                    modelName: track1.model_name,
+                    filesDownloaded: false
+                  }
+                });
+
+                loggingService.info('BeatVersion created for track 1 (legacy flow)', {
+                  service: 'SunoCallbackRoute',
+                  beatId: beat.id,
+                  taskId,
+                  audioId: track1.id
+                });
+
+                // Tạo BeatVersion cho track 2 nếu có
+                if (track2) {
+                  await prisma.beatVersion.create({
+                    data: {
+                      beatId: beat.id,
+                      versionNumber: 2,
+                      source: 'suno',
+                      isPrimary: false,
+                      status: 'completed',
+                      sunoTaskId: null,  // Track 2 KHÔNG lưu taskId (tránh conflict)
+                      sunoAudioId: track2.id,
+                      sunoAudioUrl: track2.audio_url || track2.source_audio_url,
+                      sunoImageUrl: track2.image_url || track2.source_image_url,
+                      sunoStreamUrl: track2.stream_audio_url || track2.source_stream_audio_url,
+                      duration: track2.duration,
+                      modelName: track2.model_name,
+                      filesDownloaded: false
+                    }
+                  });
+
+                  loggingService.info('BeatVersion created for track 2 (legacy flow)', {
+                    service: 'SunoCallbackRoute',
+                    beatId: beat.id,
+                    taskId,
+                    audioId: track2.id
+                  });
+                }
+              } else {
+                loggingService.warn('Beat/Version not found for taskId', {
+                  service: 'SunoCallbackRoute',
+                  taskId
+                });
+              }
+            }
+
+          } catch (updateError) {
+            loggingService.error('Failed to update beat/version with Suno metadata', {
               service: 'SunoCallbackRoute',
               taskId,
-              error: downloadError instanceof Error ? downloadError.message : String(downloadError)
+              error: updateError instanceof Error ? updateError.message : String(updateError)
             });
           }
         }

@@ -1,9 +1,11 @@
 import dotenv from 'dotenv';
-import { connectDatabase, disconnectDatabase } from './config/database.config';
+import { connectDatabase, disconnectDatabase, getPrismaClient } from './config/database.config';
 import { validateApiConfig } from './config/api.config';
 import { loggingService } from './services/logging.service';
 import { CatalogSyncService } from './services/catalog-sync.service';
 import { backupSchedulerService } from './services/backup-scheduler.service';
+import { SchedulerService } from './services/scheduler.service';
+import { OrchestratorService } from './services/orchestrator.service';
 import app from './api/server';
 import { Server } from 'http';
 
@@ -11,6 +13,7 @@ import { Server } from 'http';
 dotenv.config();
 
 let catalogSyncService: CatalogSyncService;
+let beatScheduler: SchedulerService | null = null;
 let server: Server;
 
 async function bootstrap() {
@@ -34,24 +37,32 @@ async function bootstrap() {
     backupSchedulerService.start();
     loggingService.info('Backup scheduler started');
 
-    // Start API Server
-    const PORT = parseInt(process.env.PORT || '3000', 10);
-    server = app.listen(PORT, () => {
-      loggingService.info(`API Server listening on port ${PORT}`);
-    });
+    // Conditionally start beat generation scheduler
+    const enableAutoGeneration = process.env.ENABLE_AUTO_GENERATION === 'true';
+    if (enableAutoGeneration) {
+      beatScheduler = new SchedulerService(
+        getPrismaClient(),
+        new OrchestratorService(),
+        loggingService
+      );
+      beatScheduler.start();
+      loggingService.info('Beat generation scheduler started (auto mode enabled)');
+    } else {
+      loggingService.info('Beat generation scheduler disabled (ENABLE_AUTO_GENERATION=false)');
+    }
 
+    // Note: API Server is started separately via src/api/index.ts
+    // This main entry point is for scheduler only
     loggingService.info('Beat Generator System started successfully');
 
     // Graceful shutdown
     process.on('SIGINT', async () => {
       loggingService.info('Shutting down gracefully...');
-      if (server) {
-        server.close(() => {
-          loggingService.info('API Server closed');
-        });
-      }
       if (catalogSyncService) {
         await catalogSyncService.stopWatching();
+      }
+      if (beatScheduler) {
+        beatScheduler.stop();
       }
       backupSchedulerService.stop();
       await disconnectDatabase();
@@ -60,13 +71,11 @@ async function bootstrap() {
 
     process.on('SIGTERM', async () => {
       loggingService.info('Shutting down gracefully...');
-      if (server) {
-        server.close(() => {
-          loggingService.info('API Server closed');
-        });
-      }
       if (catalogSyncService) {
         await catalogSyncService.stopWatching();
+      }
+      if (beatScheduler) {
+        beatScheduler.stop();
       }
       backupSchedulerService.stop();
       await disconnectDatabase();

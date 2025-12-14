@@ -30,7 +30,15 @@ GET /api/beats
       "name": "Energy Track",
       "genre": "Trap",
       "style": "Dark",
-      "fileUrl": "output/beats/2025-12/13/uuid.mp3"
+      "mood": "Aggressive",
+      "fileUrl": "output/beats/2025-12/13/uuid.mp3",
+      "bpm": 140,
+      "duration": 185.5,
+      "musicalKey": "C Minor",
+      "modelName": "chirp-v3-5",
+      "generationStatus": "completed",
+      "wavConversionStatus": "not_started",
+      "createdAt": "2025-12-13T10:00:00Z"
     }
   ],
   "pagination": {
@@ -62,10 +70,24 @@ GET /api/beats/:id
   "alternateFileUrl": "output/beats/2025-12/13/uuid_alt.mp3",
   "wavUrl": "output/beats-wav/2025-12/13/uuid.wav",
   "coverArtPath": "output/covers/uuid.png",
+  "bpm": 140,
+  "musicalKey": "C Minor",
+  "duration": 185.5,
+  "modelName": "chirp-v3-5",
+  "sunoAudioUrl": "https://cdn1.suno.ai/abc123.mp3",
+  "sunoImageUrl": "https://cdn1.suno.ai/image_abc123.png",
+  "sunoStreamUrl": "https://cdn1.suno.ai/abc123_stream.mp3",
+  "alternateDuration": 187.2,
+  "alternateModelName": "chirp-v3-5",
+  "alternateSunoAudioUrl": "https://cdn1.suno.ai/def456.mp3",
+  "alternateSunoImageUrl": null,
+  "alternateSunoStreamUrl": "https://cdn1.suno.ai/def456_stream.mp3",
   "generationStatus": "completed",
   "wavConversionStatus": "completed",
+  "filesUploaded": false,
   "sunoTaskId": "task123",
-  "sunoAudioId": "audio123"
+  "sunoAudioId": "audio123",
+  "createdAt": "2025-12-13T10:00:00Z"
 }
 ```
 

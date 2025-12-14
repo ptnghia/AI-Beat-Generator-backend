@@ -4,7 +4,9 @@ import { loggingService } from './logging.service';
 
 export class ApiKeyManager {
   private prisma = getPrismaClient();
-  private lastUsedKeyIndex = -1;
+  private cachedKey: ApiKey | null = null;
+  private cacheTimestamp: number = 0;
+  private readonly CACHE_TTL = 60000; // 1 minute cache
 
   /**
    * Add a new API key to the pool
@@ -19,6 +21,9 @@ export class ApiKeyManager {
           lastUsed: null
         }
       });
+
+      // Invalidate cache
+      this.cachedKey = null;
 
       loggingService.info('API key added', {
         service: 'ApiKeyManager',
@@ -43,54 +48,91 @@ export class ApiKeyManager {
   }
 
   /**
-   * Get next available API key using round-robin algorithm
+   * Get API key with priority: Database > Environment
+   * Uses simple single-key strategy with caching
    */
   async getNextAvailableKey(): Promise<ApiKey | null> {
     try {
-      // Get all active keys with quota remaining
-      const activeKeys = await this.prisma.apiKey.findMany({
-        where: {
-          status: 'active',
-          quotaRemaining: {
-            gt: 0
-          }
-        },
-        orderBy: {
-          lastUsed: 'asc' // Prefer least recently used
-        }
-      });
-
-      if (activeKeys.length === 0) {
-        loggingService.warn('No active API keys available', {
-          service: 'ApiKeyManager'
+      // Check cache first
+      const now = Date.now();
+      if (this.cachedKey && (now - this.cacheTimestamp) < this.CACHE_TTL) {
+        loggingService.info('Using cached API key', {
+          service: 'ApiKeyManager',
+          keyId: this.cachedKey.id
         });
-        return null;
+        return this.cachedKey;
       }
 
-      // Round-robin selection
-      this.lastUsedKeyIndex = (this.lastUsedKeyIndex + 1) % activeKeys.length;
-      const selectedKey = activeKeys[this.lastUsedKeyIndex];
-
-      // Update last used timestamp
-      await this.prisma.apiKey.update({
-        where: { id: selectedKey.id },
-        data: { lastUsed: new Date() }
+      // Priority 1: Get from database
+      const dbKey = await this.prisma.apiKey.findFirst({
+        where: {
+          status: 'active',
+          quotaRemaining: { gt: 0 }
+        },
+        orderBy: { createdAt: 'asc' } // Use oldest key (most stable)
       });
 
-      loggingService.info('API key selected', {
-        service: 'ApiKeyManager',
-        keyId: selectedKey.id,
-        quotaRemaining: selectedKey.quotaRemaining
-      });
+      if (dbKey) {
+        // Update last used timestamp
+        await this.prisma.apiKey.update({
+          where: { id: dbKey.id },
+          data: { lastUsed: new Date() }
+        });
 
-      return {
-        id: selectedKey.id,
-        key: selectedKey.key,
-        status: selectedKey.status as 'active' | 'exhausted' | 'error',
-        quotaRemaining: selectedKey.quotaRemaining,
-        lastUsed: selectedKey.lastUsed || undefined,
-        createdAt: selectedKey.createdAt
-      };
+        const apiKey = {
+          id: dbKey.id,
+          key: dbKey.key,
+          status: dbKey.status as 'active' | 'exhausted' | 'error',
+          quotaRemaining: dbKey.quotaRemaining,
+          lastUsed: dbKey.lastUsed || undefined,
+          createdAt: dbKey.createdAt
+        };
+
+        // Cache the key
+        this.cachedKey = apiKey;
+        this.cacheTimestamp = now;
+
+        loggingService.info('API key selected from database', {
+          service: 'ApiKeyManager',
+          keyId: apiKey.id,
+          quotaRemaining: apiKey.quotaRemaining
+        });
+
+        return apiKey;
+      }
+
+      // Priority 2: Fallback to .env if database is empty
+      const envKey = process.env.SUNO_API_KEYS?.split(',')[0]?.trim();
+      
+      if (envKey) {
+        loggingService.warn('No database API key found, using .env fallback', {
+          service: 'ApiKeyManager',
+          key: envKey.substring(0, 10) + '...'
+        });
+
+        // Create temporary API key object (not saved to DB)
+        const apiKey: ApiKey = {
+          id: 'env-fallback',
+          key: envKey,
+          status: 'active',
+          quotaRemaining: 500, // Default quota
+          createdAt: new Date()
+        };
+
+        // Cache the fallback key
+        this.cachedKey = apiKey;
+        this.cacheTimestamp = now;
+
+        return apiKey;
+      }
+
+      // No keys available
+      loggingService.warn('No API keys available (database or .env)', {
+        service: 'ApiKeyManager'
+      });
+      
+      return null;
+
     } catch (error) {
       loggingService.logError('ApiKeyManager', error as Error, {
         context: 'getNextAvailableKey'

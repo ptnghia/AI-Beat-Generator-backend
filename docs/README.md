@@ -6,10 +6,17 @@ Tài liệu hướng dẫn cho Automated Beat Generation System.
 
 ### API Documentation
 - **[API.md](API.md)** - REST API endpoints, request/response formats, examples
+- **[FRONTEND_API.md](FRONTEND_API.md)** - Frontend integration guide with React examples
+- **[API_UPDATES.md](API_UPDATES.md)** - New fields migration guide (Dec 2025)
+- **[API_UPDATE_SUMMARY.md](API_UPDATE_SUMMARY.md)** - Complete update summary with verification results
+- **[API_FIELDS_REFERENCE.md](API_FIELDS_REFERENCE.md)** - Quick reference for all 34 beat response fields
 
 ### Guides
 - **[BEATSTARS_GUIDE.md](BEATSTARS_GUIDE.md)** - Hướng dẫn upload beats lên BeatStars
 - **[BACKUP_PROCEDURES.md](BACKUP_PROCEDURES.md)** - Quy trình backup và restore database
+- **[STORAGE_GUIDE.md](STORAGE_GUIDE.md)** - File storage and organization guide
+- **[WAV_CONVERSION_GUIDE.md](WAV_CONVERSION_GUIDE.md)** - WAV conversion implementation guide
+- **[WEBHOOK_GUIDE.md](WEBHOOK_GUIDE.md)** - Webhook integration guide
 
 ### Specifications
 - **[Spec Documents](../.kiro/specs/automated-beat-generation/)** - Complete requirements, design, and tasks

@@ -1,0 +1,98 @@
+╔══════════════════════════════════════════════════════════════╗
+║          🎵 AI BEAT GENERATOR - QUICK REFERENCE             ║
+╚══════════════════════════════════════════════════════════════╝
+
+📍 PRODUCTION URL
+   https://beat.optiwellai.com
+
+🔧 PM2 COMMANDS
+   pm2 list                          # List all services
+   pm2 logs ai-beat-generator-api    # View API logs
+   pm2 restart all                   # Restart all services
+   pm2 stop all                      # Stop all services
+   pm2 monit                         # Monitor dashboard
+
+🗄️ DATABASE
+   Database: ai_beat_generator
+   User: beat_gen_user
+   Port: 5432
+   Connection:
+   psql -U beat_gen_user -d ai_beat_generator
+
+📡 KEY ENDPOINTS
+   GET  /health                      # Health check
+   GET  /api/stats                   # System stats
+   GET  /api/beats                   # List beats
+   GET  /api/beats/pending/list      # Pending beats
+   POST /api/admin/login             # Admin login
+   GET  /api/callbacks/suno/test     # Test webhook
+
+🧪 TESTING
+   ./test-api.sh                     # Run full test suite
+   
+   Quick Tests:
+   curl https://beat.optiwellai.com/health
+   curl https://beat.optiwellai.com/api/stats
+
+🔑 API KEYS NEEDED (in .env)
+   ⚠️ GEMINI_API_KEY     = (not configured)
+   ⚠️ OPENAI_API_KEY     = (not configured)
+   ⚠️ SUNO_API_KEY       = (not configured)
+
+📊 CURRENT STATUS
+   ✅ API Server         = Online (Port 4000)
+   ✅ Scheduler          = Online (Background)
+   ✅ Database           = Connected
+   ✅ HTTPS Domain       = Working
+   ⚠️  API Keys          = Not Configured
+   ⚠️  Admin User        = Not Created
+
+🚀 QUICK START
+   1. Configure API keys in .env
+   2. Create admin user via Prisma Studio
+   3. Test beat generation
+   4. Monitor logs: pm2 logs
+
+📁 PROJECT STRUCTURE
+   /home/lifetechadmin/opt/AI-Beat-Generator-backend/
+   ├── src/              # Source code
+   ├── dist/             # Compiled JavaScript
+   ├── prisma/           # Database schema
+   ├── logs/             # Application logs
+   └── .env              # Configuration
+
+🔄 REBUILD & RESTART
+   npm run build
+   pm2 restart all
+
+📝 LOGS
+   API Logs:
+   - /home/lifetechadmin/opt/AI-Beat-Generator-backend/logs/api-out.log
+   - /home/lifetechadmin/opt/AI-Beat-Generator-backend/logs/api-error.log
+   
+   PM2 Logs:
+   - pm2 logs --timestamp
+   - pm2 flush  # Clear logs
+
+🐛 COMMON ISSUES
+   Problem: Service not starting
+   → pm2 delete all && pm2 start ecosystem.config.js
+   
+   Problem: Database connection error
+   → Check .env DATABASE_URL
+   → Verify PostgreSQL: sudo systemctl status postgresql
+   
+   Problem: API returns 502
+   → Check Nginx config: sudo nginx -t
+   → Restart Nginx: sudo systemctl restart nginx
+
+📞 SUPPORT FILES
+   - DEPLOYMENT_SUCCESS.md   # Full deployment report
+   - API_ENDPOINTS.md        # Complete API documentation
+   - DEPLOYMENT_GUIDE.md     # Setup instructions
+   - PORT_STRATEGY.md        # Port allocation info
+
+╔══════════════════════════════════════════════════════════════╗
+║  🎉 STATUS: PRODUCTION READY                                ║
+║  📅 Deployed: December 13, 2024                              ║
+╚══════════════════════════════════════════════════════════════╝

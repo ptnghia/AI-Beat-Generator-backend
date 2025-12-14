@@ -134,10 +134,26 @@ curl http://localhost:3000/api/beats?page=2&limit=20
         "moodEnhancement": "Emphasize Modern / Clean atmosphere..."
       },
       "apiKeyUsed": "ab38dfd4-2142-43d6-a5f8-21637661f9cf",
+      "bpm": 120,
       "musicalKey": "D Minor",
       "coverArtPath": "output/covers/temp-1765603550720.png",
       "previewPath": null,
       "pricing": null,
+      "duration": 185.5,
+      "modelName": "chirp-v3-5",
+      "sunoAudioUrl": "https://cdn1.suno.ai/abc123.mp3",
+      "sunoImageUrl": "https://cdn1.suno.ai/image_abc123.png",
+      "sunoStreamUrl": "https://cdn1.suno.ai/abc123_stream.mp3",
+      "alternateFileUrl": "output/beats/job-1765603549108-track2.mp3",
+      "alternateDuration": 187.2,
+      "alternateModelName": "chirp-v3-5",
+      "alternateSunoAudioUrl": "https://cdn1.suno.ai/def456.mp3",
+      "alternateSunoImageUrl": null,
+      "alternateSunoStreamUrl": "https://cdn1.suno.ai/def456_stream.mp3",
+      "wavUrl": null,
+      "wavConversionStatus": "not_started",
+      "generationStatus": "completed",
+      "filesUploaded": false,
       "createdAt": "2025-12-13T05:25:52.112Z"
     }
   ],
@@ -204,10 +220,26 @@ curl http://localhost:3000/api/beats/f61618c2-e9a7-4d38-a240-2d11bb860e0e
     "moodEnhancement": "Emphasize Modern / Clean atmosphere..."
   },
   "apiKeyUsed": "ab38dfd4-2142-43d6-a5f8-21637661f9cf",
+  "bpm": 120,
   "musicalKey": "D Minor",
   "coverArtPath": "output/covers/temp-1765603550720.png",
   "previewPath": null,
   "pricing": null,
+  "duration": 185.5,
+  "modelName": "chirp-v3-5",
+  "sunoAudioUrl": "https://cdn1.suno.ai/abc123.mp3",
+  "sunoImageUrl": "https://cdn1.suno.ai/image_abc123.png",
+  "sunoStreamUrl": "https://cdn1.suno.ai/abc123_stream.mp3",
+  "alternateFileUrl": "output/beats/job-1765603549108-track2.mp3",
+  "alternateDuration": 187.2,
+  "alternateModelName": "chirp-v3-5",
+  "alternateSunoAudioUrl": "https://cdn1.suno.ai/def456.mp3",
+  "alternateSunoImageUrl": null,
+  "alternateSunoStreamUrl": "https://cdn1.suno.ai/def456_stream.mp3",
+  "wavUrl": null,
+  "wavConversionStatus": "not_started",
+  "generationStatus": "completed",
+  "filesUploaded": false,
   "createdAt": "2025-12-13T05:25:52.112Z"
 }
 ```
@@ -353,10 +385,35 @@ interface Beat {
     moodEnhancement: string;
   };
   apiKeyUsed: string;            // API key UUID
+  bpm: number | null;            // Detected BPM (beats per minute)
   musicalKey: string | null;     // Musical key (e.g., "D Minor")
   coverArtPath: string | null;   // Cover art path
   previewPath: string | null;    // Preview path
   pricing: object | null;        // Pricing tiers
+  
+  // Audio metadata from Suno
+  duration: number | null;       // Audio duration in seconds
+  modelName: string | null;      // Suno model used (e.g., "chirp-v3-5")
+  sunoAudioUrl: string | null;   // Direct audio URL from Suno CDN
+  sunoImageUrl: string | null;   // Cover image URL from Suno
+  sunoStreamUrl: string | null;  // Streaming audio URL from Suno
+  
+  // Alternate track (Track 2)
+  alternateFileUrl: string | null;      // Second MP3 track
+  alternateDuration: number | null;     // Duration of second track
+  alternateModelName: string | null;    // Model used for second track
+  alternateSunoAudioUrl: string | null; // Audio URL for second track
+  alternateSunoImageUrl: string | null; // Image URL for second track
+  alternateSunoStreamUrl: string | null;// Stream URL for second track
+  
+  // WAV conversion (on-demand)
+  wavUrl: string | null;         // WAV file path
+  wavConversionStatus: string | null; // not_started, processing, completed, failed
+  
+  // Status tracking
+  generationStatus: string;      // pending, completed, failed
+  filesUploaded: boolean;        // True if files manually uploaded
+  
   createdAt: string;             // ISO 8601 timestamp
 }
 ```
