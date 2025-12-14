@@ -87,6 +87,14 @@ app.use('/api/callbacks', callbackRoutes);
 import { adminAuthRoutes } from './routes/admin-auth.routes';
 app.use('/api/admin', adminAuthRoutes);
 
+// Admin management routes (beat CRUD, API keys, logs)
+import adminRoutes from './routes/admin.routes';
+app.use('/api/admin', adminRoutes);
+
+// BeatStars export routes
+import beatstarsRoutes from './routes/beatstars.routes';
+app.use('/api/beatstars', beatstarsRoutes);
+
 // 404 handler
 app.use((req: Request, res: Response) => {
   res.status(404).json({

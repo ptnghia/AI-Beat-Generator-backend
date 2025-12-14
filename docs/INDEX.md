@@ -22,6 +22,7 @@ This folder contains comprehensive documentation for the AI Beat Generator backe
 | Document | Description |
 |----------|-------------|
 | **[API_REFERENCE.md](API_REFERENCE.md)** | Complete REST API documentation with examples |
+| **[ADMIN_API.md](ADMIN_API.md)** ⭐ NEW | Admin & BeatStars API endpoints |
 | **[FRONTEND_GUIDE.md](FRONTEND_GUIDE.md)** | Frontend integration guide and best practices |
 | **[FRONTEND_API.md](FRONTEND_API.md)** | Detailed API endpoint specifications |
 
@@ -29,6 +30,7 @@ This folder contains comprehensive documentation for the AI Beat Generator backe
 
 | Document | Description |
 |----------|-------------|
+| **[IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md)** ⭐ NEW | Latest backend implementation details |
 | **[WEBHOOK_GUIDE.md](WEBHOOK_GUIDE.md)** | Webhook integration and callback handling |
 | **[STORAGE_GUIDE.md](STORAGE_GUIDE.md)** | File storage and organization strategy |
 | **[WAV_CONVERSION_GUIDE.md](WAV_CONVERSION_GUIDE.md)** | WAV conversion workflow |
@@ -207,6 +209,8 @@ npm run restore:database -- backups/backup-file.sql
 | Document | Status | Last Updated |
 |----------|--------|--------------|
 | API_REFERENCE.md | ✅ Complete | Dec 14, 2025 |
+| ADMIN_API.md | ✅ Complete | Dec 14, 2025 |
+| IMPLEMENTATION_SUMMARY.md | ✅ Complete | Dec 14, 2025 |
 | FRONTEND_GUIDE.md | ✅ Complete | Dec 13, 2025 |
 | WEBHOOK_GUIDE.md | ✅ Complete | Dec 13, 2025 |
 | STORAGE_GUIDE.md | ✅ Complete | Nov 2025 |
